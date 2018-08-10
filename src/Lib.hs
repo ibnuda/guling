@@ -8,22 +8,24 @@ import           Protolude
 import           Conduit                 as C
 import           Data.Conduit.Attoparsec
 import           Data.Text               (pack)
+import           Options.Applicative
 
+import           OpsiJalan
 import           Types
 import           Urai
 
 someFunc :: IO ()
 someFunc = do
-  forM_ [0 .. 6 :: Int] $ \_ -> putText "doing something very stupid."
-  something <- do
-    runConduitRes
-       $ C.sourceFile "gedhe.log"
-      .| conduitParser parseKomLog
-      .| filterC (\(_, KomLog _ _ c _ _) -> c == Error)
-      .| mapC posrangekomlogketeks
-      .| iterMC putText
-      .| lengthC
-  print (something :: Int)
+  Opsi {..} <- execParser infoopsi
+  runConduitRes
+     $ C.sourceFile opsiNamaBerkas
+    .| conduitParser parseKomLog
+    .| filterC (\(_, KomLog _ _ c _ _) -> c == Error)
+    .| takeC opsiJumlahMaksimal
+    .| mapC posrangekomlogketeks
+    .| iterMC putText
+    .| sinkNull
+
 
 posrangekomlogketeks :: (PositionRange, KomLog) -> Text
 posrangekomlogketeks (PositionRange {..}, KomLog {..}) =

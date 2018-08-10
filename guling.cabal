@@ -19,6 +19,7 @@ library
   exposed-modules:     Lib
   other-modules:       Types
                      , Urai
+                     , OpsiJalan
   build-depends:       base >= 4.7 && < 5
                      , protolude >= 0.2
                      , attoparsec

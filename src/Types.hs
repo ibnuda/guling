@@ -31,3 +31,10 @@ instance Eq KomLog where
 instance Ord KomLog where
   compare a b =
     compare (T.length $ komlogErrorMessage a) (T.length $ komlogErrorMessage b)
+
+
+data Opsi = Opsi
+  { opsiJumlahMinimal  :: Int
+  , opsiJumlahMaksimal :: Int
+  , opsiNamaBerkas     :: FilePath
+  }
