@@ -1,11 +1,13 @@
 module Urai where
 
-import           Protolude                        hiding (option, takeWhile, take)
+import           Protolude                        hiding (option, take,
+                                                   takeWhile)
 
 import           Data.Attoparsec.ByteString.Char8 as BC
 import           Data.Attoparsec.Combinator
 import qualified Data.ByteString.Char8            as BS
 import           Data.Fixed
+import           Data.Text                        (pack)
 import           Data.Time
 import           Unsafe.Coerce                    (unsafeCoerce)
 
@@ -13,15 +15,16 @@ import           Types
 
 parseSeverity :: Parser Severity
 parseSeverity =
-  (string "INFO" >> return Info)
-    <|> (string "WARN" >> return Warn)
-    <|> (string "ERROR" >> return Error)
-    <|> (string "FATAL" >> return Fatal)
+  ("INFO" >> return Info)
+    <|> ("WARN" >> return Warn)
+    <|> ("ERROR" >> return Error)
+    <|> ("FATAL" >> return Fatal)
 
 parseMethod :: Parser ByteString
 parseMethod = do
   _         <- char '['
   something <- takeWhile (/= ']')
+  _         <- char ']'
   return something
 
 parseTanggal :: Parser Day
@@ -30,7 +33,6 @@ parseTanggal = do
   y        <- decimal <* char '-'
   m        <- duaDigit <* char '-'
   d        <- duaDigit
---maybe (panic "Tanggal ra mutu.") return (fromGregorianValid (absOrNeg y) m d)
   return $ fromGregorian (absOrNeg y) m d
 
 parseJam :: Parser TimeOfDay
@@ -63,8 +65,17 @@ parseDetik = do
 data T = T {-# UNPACK #-} !Int {-# UNPACK #-} !Int64
 
 tanggalDiDepan :: Parser ()
-tanggalDiDepan =
-  lookAhead (parseTanggal *> parseSeverity *> parseMethod) *> return ()
+tanggalDiDepan = do
+  lookAhead
+      (  parseTanggal
+      *> skipSpace
+      *> parseJam
+      *> skipSpace
+      *> parseSeverity
+      *> skipSpace
+      *> parseMethod
+      )
+    *> return ()
 
 duaDigit :: Parser Int
 duaDigit = do
@@ -74,8 +85,6 @@ duaDigit = do
   return $! c2d a * 10 + c2d b
 
 
--- | Ada yang salah disini.
---   Mbuh. Ngantuk.
 parseKomLog :: Parser KomLog
 parseKomLog = do
   tanggal  <- parseTanggal
@@ -85,5 +94,6 @@ parseKomLog = do
   severity <- parseSeverity
   _        <- skipSpace
   method   <- parseMethod
-  _        <- manyTill anyChar $ endOfLine <|> tanggalDiDepan
-  return $ KomLog tanggal jam severity method
+  _        <- skipSpace
+  message  <- manyTill anyChar $ endOfInput <|> tanggalDiDepan
+  return $ KomLog tanggal jam severity method (pack message)
