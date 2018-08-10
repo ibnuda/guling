@@ -15,8 +15,8 @@ someFunc = do
   forM_ [0 .. 6 :: Int] $ \_ -> putText "doing something very stupid."
   something <- do
     runConduitRes
-       $ C.sourceFile "xaa.log"
+       $ C.sourceFile "cilik.log"
       .| conduitParser parseKomLog
---    .| iterMC (putText . pack . show)
+      .| iterMC (putText . pack . show)
       .| lengthC
   print (something :: Int)

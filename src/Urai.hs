@@ -79,11 +79,11 @@ duaDigit = do
 parseKomLog :: Parser KomLog
 parseKomLog = do
   tanggal  <- parseTanggal
-  _        <- space
+  _        <- skipSpace
   jam      <- parseJam
-  _        <- space
+  _        <- skipSpace
   severity <- parseSeverity
   _        <- skipSpace
   method   <- parseMethod
-  _        <- manyTill anyChar $ endOfInput <|> tanggalDiDepan
+  _        <- manyTill anyChar $ endOfLine <|> tanggalDiDepan
   return $ KomLog tanggal jam severity method
