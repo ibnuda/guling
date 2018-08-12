@@ -2,7 +2,8 @@ module Types where
 
 import           Protolude
 
-import           Data.Text as T
+import           Data.String
+import           Data.Text   as T
 import           Data.Time
 
 data Severity
@@ -11,6 +12,17 @@ data Severity
   | Error
   | Fatal
   deriving (Read, Show, Enum, Eq, Ord)
+
+instance IsString Severity where
+  fromString "info"  = Info
+  fromString "INFO"  = Info
+  fromString "warn"  = Warn
+  fromString "WARN"  = Warn
+  fromString "error" = Error
+  fromString "ERROR" = Error
+  fromString "fatal" = Fatal
+  fromString "FATAL" = Fatal
+  fromString _       = Error -- Karena default untuk cari error.
 
 data KomLog = KomLog
   { komlogHari         :: Day
@@ -34,7 +46,7 @@ instance Ord KomLog where
 
 
 data Opsi = Opsi
-  { opsiJumlahMinimal  :: Int
-  , opsiJumlahMaksimal :: Int
+  { opsiJumlahMaksimal :: Int
   , opsiNamaBerkas     :: FilePath
+  , opsiSeverity       :: Severity
   }

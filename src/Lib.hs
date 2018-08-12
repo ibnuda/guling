@@ -18,9 +18,9 @@ someFunc :: IO ()
 someFunc = do
   Opsi {..} <- execParser infoopsi
   runConduitRes
-     $ C.sourceFile opsiNamaBerkas
+    $  C.sourceFile opsiNamaBerkas
     .| conduitParser parseKomLog
-    .| filterC (\(_, KomLog _ _ c _ _) -> c == Error)
+    .| filterC (\(_, KomLog _ _ c _ _) -> c == opsiSeverity)
     .| takeC opsiJumlahMaksimal
     .| mapC posrangekomlogketeks
     .| iterMC putText
